@@ -343,6 +343,7 @@ export class MyAcademyPageComponent implements OnInit{
           .subscribe(
             data => {
               const courseData = data;
+              this.loading = false;
               // console.log(courseData);
               //update user hasAcademy
               this.courseService.getAllCoursesByAcademyId(this.academy.academyid)
