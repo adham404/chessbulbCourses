@@ -1,20 +1,9 @@
-const util = require("util");
-const multer = require("multer");
+const busboy = require('connect-busboy');
 
-let storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, __basedir + "/src/assets/");
-  },
-  filename: (req, file, cb) => {
-    console.log("file is: ", "video");
-    console.log("Video upload middleware is working")
-    cb(null, "video");
-  },
-});
 
-const uploadVideo = multer({
-  storage: storage,
-  // limits: { fileSize: 200 * 1024 * 1024 }, 
+
+const uploadVideo = busboy({
+  highWaterMark: 2 * 1024 * 1024, // Set 2MiB buffer
 })
 
 module.exports = uploadVideo;

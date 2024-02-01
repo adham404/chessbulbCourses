@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
+const busboy = require('connect-busboy'); 
 
 // const authRoute = require('./src/routes/auth.route');
 
@@ -24,6 +25,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(morgan('dev'));
 app.use(morgan('combined', { stream: httpLogStream }));
 app.use(cors());
+app.use(busboy({
+    highWaterMark: 2 * 1024 * 1024, // Set 2MiB buffer
+}));
 
 // app.use('/api/auth', authRoute);
 // app.use('/api', carRoute);

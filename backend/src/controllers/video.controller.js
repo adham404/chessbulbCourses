@@ -5,6 +5,8 @@ const fs = require('fs');
 const ffmpeg = require('ffmpeg');
 const AWS = require('aws-sdk');
 const { exec } = require('child_process');
+const path = require('path'); 
+  
 
 
 AWS.config.update({
@@ -28,7 +30,9 @@ const deleteFile = (filePath) => {
     );
 }
 
-function transcodeToHLS(inputFilePath, outputFilePath) {
+function transcodeToHLS(inputFilePath, outputFilePath, outputDirectory, folderName) {
+    console.log('Transcoding to HLS...');
+    console.log(inputFilePath);
     return new Promise((resolve, reject) => {
       // Add backslash to escape spaces  in file path
       inputFilePath = inputFilePath.replace(/ /g, '\\ ');
@@ -39,12 +43,24 @@ function transcodeToHLS(inputFilePath, outputFilePath) {
       // Execute the ffmpeg command for transcoding to HLS
       const command = `ffmpeg -i ${inputFilePath} -c:v h264 -hls_time 10 -hls_list_size 0 ${outputFilePath}`;
       
-      exec(command, (error, stdout, stderr) => {
+      exec(command, async (error, stdout, stderr) => {
         if (error) {
           console.error(`Error: ${error.message}`);
           reject(error.message);
         } else {
           console.log(`Transcoding successful: ${stdout}`);
+          // remove backslash from output file path
+          inputFilePath = inputFilePath.replace(/\\/g, '');
+          fs.unlinkSync(inputFilePath);
+          const files = fs.readdirSync(outputDirectory);
+      
+          for (const file of files) {
+            const filePath = `${outputDirectory}${file}`;
+            const key = `videos/${folderName}/${file}`;
+            await uploadToS3(key, filePath);
+            console.log(`Uploaded ${file} to S3`);
+          }
+          fs.rmdirSync(outputDirectory, { recursive: true });
           resolve();
         }
       });
@@ -74,46 +90,61 @@ function transcodeToHLS(inputFilePath, outputFilePath) {
 
 
 exports.uploadVideo = async (req, res) => {
-    try {
-        if (!req.file) {
-          return res.status(400).send('No file provided');
-        }
-    
-        const inputFilePath = req.file.path;
-        const outputDirectory = __basedir + "/src/output/";
-        const outputFilePath = `${outputDirectory}playlist.m3u8`;
-        //create output directory if it doesn't exist
+
+  // await uploadToS3(key, outputFilePath);
+    // try {
+        req.pipe(req.busboy);
+        console.log(req.file);
+        var folderName = Date.now();
+        var uploadPath = path.join(__basedir, 'fu/'); // Register the upload path
+        let outputDirectory = __basedir + "/src/output/";
         if (!fs.existsSync(outputDirectory)) {
           fs.mkdirSync(outputDirectory);
         }
-    
-        await transcodeToHLS(inputFilePath, outputFilePath);
-    
-        //for each file in the output directory, upload it to S3
-        const files = fs.readdirSync(outputDirectory);
-        let folderName = Date.now();
-        for (const file of files) {
-          const filePath = `${outputDirectory}${file}`;
-          const key = `videos/${folderName}/${file}`;
-          await uploadToS3(key, filePath);
+        outputDirectory = __basedir + "/src/output/" + Date.now() + "/";
+        if (!fs.existsSync(outputDirectory)) {
+          fs.mkdirSync(outputDirectory);
+        }
+        let outputFilePath = `${outputDirectory}playlist.m3u8`;
+        // fs.ensureDir(uploadPath);
+        if (!fs.existsSync(uploadPath)) {
+          fs.mkdirSync(uploadPath);
         }
 
+        req.busboy.on('file', async (fieldname, file, filename) => {
+          console.log(`Upload of 'Video' started`);
+          console.log(filename.filename);
+          uploadPath = path.join(uploadPath.toString(), filename.filename.toString())
+          console.log(uploadPath);
+          console.log(path.join(uploadPath.toString(), filename.filename.toString()));
+          console.log(file)
+          // Create a write stream of the new file
+          const fstream = fs.createWriteStream(uploadPath);
+          // Pipe it trough
+          file.pipe(fstream);
+  
+          // On finish of the upload
+          fstream.on('close', () => {
+              console.log(`Upload of '${filename.filename.toString()}' finished`);
+              transcodeToHLS(uploadPath, outputFilePath, outputDirectory, folderName);
+
+          });
+      });
+      
+      const key = `videos/${folderName}/playlist.m3u8`;
+      const cdnUrl = `https://chessbulb.s3.us-east-1.amazonaws.com/${key}`;
+      res.send({ cdnUrl });
+      // await transcodeToHLS(uploadPath, outputFilePath);
+          
+      //for each file in the output directory, upload it to S3
 
 
-        const key = `videos/${folderName}/playlist.m3u8`;
-    
-        // await uploadToS3(key, outputFilePath);
-    
-        const cdnUrl = `https://chessbulb.s3.us-east-1.amazonaws.com/${key}`;
-    
-        // Clean up: Delete the local file and output directory after transcoding and uploading
-        
-        fs.unlinkSync(inputFilePath);
-        fs.rmdirSync(outputDirectory, { recursive: true });
-    
-        res.send({ cdnUrl });
-      } catch (error) {
-        console.error(error);
-        res.status(500).send('Internal Server Error');
-      }
+      
+      
+      
+
+      // } catch (error) {
+      //   console.error(error);
+      //   res.status(500).send('Internal Server Error');
+      // }
 }
