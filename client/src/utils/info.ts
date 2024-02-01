@@ -1,3 +1,3 @@
 export default {
-    BackendUrl: "http://localhost:3000/api/",
+    BackendUrl: "https://hammerhead-app-sv7hf.ondigitalocean.app/api/",
   };

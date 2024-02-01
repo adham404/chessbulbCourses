@@ -196,6 +196,9 @@ export class MyAcademyPageComponent implements OnInit{
             .subscribe(
               data => {
                 this.user = data;
+                setTimeout(() => {
+                  initFlowbite();;
+                }, 1000);
                 // console.log(userData);
                 // console.log(this.user);
                 // console.log(status);

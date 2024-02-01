@@ -58,14 +58,20 @@ export class MyCourseCardComponent implements OnInit{
       });
     },error => {
       console.log(error);
-      this.activationData = {
-        userId: this.user.uid,
-        approved: null,
-        ownerId: null,
-        academyId: this.course.academyid,
-      }
-      this.sharedService.sendData(this.activationData);
-      this.router.navigate(['/Course', this.course.courseid]);
+      this.academyService.getOneAcademyByAcademyId(this.course.academyid).subscribe((data) => {
+        this.academy = data;
+        this.activationData = {
+          userId: this.user.uid,
+          approved: null,
+          ownerId: this.academy.ownerid,
+          academyId: this.course.academyid,
+        }
+        this.sharedService.sendData(this.activationData);
+        this.router.navigate(['/Course', this.course.courseid]);
+      },error => {
+        console.log(error);
+      });
+
     });
     
   }

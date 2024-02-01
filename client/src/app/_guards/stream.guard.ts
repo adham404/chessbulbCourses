@@ -36,9 +36,9 @@ export class StreamGuard implements CanActivate {
     next: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): boolean {
-
-    // if (this.activationData.approved || this.activationData.ownerId == this.activationData.userId) {
-    if (this.activationData.approved) {
+    console.log(this.activationData);
+    if (this.activationData.approved || this.activationData.ownerId == this.activationData.userId) {
+    // if (this.activationData.approved) {
       return true; // User is authenticated, allow access to the route
     }else{
       this.router.navigate(['/Payment',this.activationData.academyId]);
