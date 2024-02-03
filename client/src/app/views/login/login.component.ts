@@ -18,7 +18,7 @@ export class LoginComponent implements OnInit{
   }
 
   async signInWithFB():Promise<void>{
-    await this.authService.FacebookAuth();
+    await this.authService.GoogleAuth();
   }
 
 }

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { FacebookAuthProvider } from 'firebase/auth';
+// import { FacebookAuthProvider } from 'firebase/auth';
+import { GoogleAuthProvider } from 'firebase/auth';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { UserService } from './user.service';
 import { Router } from '@angular/router';
@@ -29,13 +30,8 @@ export class AuthService {
   // authenticated : boolean = this.afAuth.currentUser !== null
 
   
-
-
-  
-
-  // Sign in with Facebook
-  async FacebookAuth() {
-    await this.AuthLogin(new FacebookAuthProvider());
+  async GoogleAuth() {
+    await this.AuthLogin(new GoogleAuthProvider());
     // this.afAuth.user.subscribe((user) => {
     //   if (user) {
     //     this.userData = user;
@@ -84,6 +80,60 @@ export class AuthService {
 
     
   }
+
+  
+
+  // Sign in with Facebook
+  // async FacebookAuth() {
+  //   await this.AuthLogin(new FacebookAuthProvider());
+  //   // this.afAuth.user.subscribe((user) => {
+  //   //   if (user) {
+  //   //     this.userData = user;
+  //   //     localStorage.setItem('user', JSON.stringify(this.userData));
+  //   //     JSON.parse(localStorage.getItem('user')!);
+  //   //   } else {
+  //   //     localStorage.setItem('user', 'null');
+  //   //     JSON.parse(localStorage.getItem('user')!);
+  //   //   }
+
+  //   // });
+
+  //   function waitForValue(observable: Observable<any>): Promise<any> {
+  //     return new Promise((resolve, reject) => {
+  //       const subscription = observable.subscribe({
+  //         next: (value) => {
+  //           subscription.unsubscribe(); // Unsubscribe to stop listening to the observable
+  //           resolve(value);
+  //         },
+  //         error: (error) => {
+  //           subscription.unsubscribe(); // Unsubscribe in case of an error
+  //           reject(error);
+  //         },
+  //       });
+  //     });
+  //   }
+  //   const user = await waitForValue(this.afAuth.user)
+  //   if (user) {
+  //     this.userData = user;
+  //     localStorage.setItem('user', JSON.stringify(this.userData));
+  //     // JSON.parse(localStorage.getItem('user')!);
+  //     this.userService.addUser(this.userData.uid,this.userData.displayName,this.userData.email,this.userData.photoURL,false).subscribe((data) => {
+  //       console.log(data)
+  //     }
+  //     )
+  //   } else {
+  //     localStorage.setItem('user', 'null');
+  //     // JSON.parse(localStorage.getItem('user')!);
+  //   }
+
+  //   console.log('You have been successfully logged in!');
+
+
+  //   this.router.navigate(['/Academies'])
+
+
+    
+  // }
 
 
   adminLogin(password: string): void {
