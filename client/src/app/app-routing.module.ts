@@ -15,6 +15,10 @@ import { StreamGuard } from './_guards/stream.guard';
 import { AdminLoginComponent } from './views/admin-login/admin-login.component';
 import { AdminPanelComponent } from './views/admin-panel/admin-panel.component';
 import { EnrollmentsComponent } from './views/enrollments/enrollments.component';
+import { AboutUsComponent } from './views/about-us/about-us.component';
+import { PolicyComponent } from './views/policy/policy.component';
+import { ContactComponent } from './views/contact/contact.component';
+import { RefundPolicyComponent } from './views/refund-policy/refund-policy.component';
 
 
 const routes: Routes = [
@@ -29,6 +33,10 @@ const routes: Routes = [
   { path: 'Payment/:academyId', component:  PaymentComponent, canActivate:[AuthGuard]},
   { path: 'Course/:courseId', component:  CourseStreamingComponent, canActivate:[AuthGuard, StreamGuard]},
   { path: 'Admin Login', component:  AdminLoginComponent},
+  { path: 'About Us', component:  AboutUsComponent},
+  { path: 'Privacy Policy', component:  PolicyComponent},
+  { path: 'Contact', component:  ContactComponent},
+  { path: 'Refund Policy', component:  RefundPolicyComponent},
   // { path: 'ForgotPassword', component:  ForgotPasswordComponent},
   // { path: 'ResetPassword', component:  ResetPasswordComponent},
   { path: '**', component:  NotFoundComponent},
