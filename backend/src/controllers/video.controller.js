@@ -122,7 +122,8 @@ exports.uploadVideo = async (req, res) => {
           const fstream = fs.createWriteStream(uploadPath);
           // Pipe it trough
           file.pipe(fstream);
-  
+          while (!fstream.writableFinished){
+          }
           // On finish of the upload
           fstream.on('close', () => {
               console.log(`Upload of '${filename.filename.toString()}' finished`);

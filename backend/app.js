@@ -26,7 +26,7 @@ app.use(morgan('dev'));
 app.use(morgan('combined', { stream: httpLogStream }));
 app.use(cors());
 app.use(busboy({
-    highWaterMark: 2 * 1024 * 1024, // Set 2MiB buffer
+    highWaterMark: 2084 * 1024 * 1024, // Set 2MiB buffer
 }));
 
 // app.use('/api/auth', authRoute);
