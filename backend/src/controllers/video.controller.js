@@ -6,7 +6,10 @@ const ffmpeg = require('ffmpeg');
 const AWS = require('aws-sdk');
 const { exec } = require('child_process');
 const path = require('path'); 
-  
+//const stream = require('stream');
+//const util = require('util');
+
+//const pipeline = util.promisify(stream.pipeline);
 
 
 AWS.config.update({
@@ -89,12 +92,12 @@ function transcodeToHLS(inputFilePath, outputFilePath, outputDirectory, folderNa
 
 
 
-exports.uploadVideo = async (req, res) => {
+exports.uploadVideo = (req, res) => {
 
   // await uploadToS3(key, outputFilePath);
     // try {
         req.pipe(req.busboy);
-        console.log(req.file);
+        //console.log(req.file);
         var folderName = Date.now();
         var uploadPath = path.join(__basedir, 'fu/'); // Register the upload path
         let outputDirectory = __basedir + "/src/output/";
@@ -110,30 +113,41 @@ exports.uploadVideo = async (req, res) => {
         if (!fs.existsSync(uploadPath)) {
           fs.mkdirSync(uploadPath);
         }
-
-        req.busboy.on('file', async (fieldname, file, filename) => {
+        req.busboy.on('file', (fieldname, file, filename) => {
           console.log(`Upload of 'Video' started`);
           console.log(filename.filename);
           uploadPath = path.join(uploadPath.toString(), filename.filename.toString())
           console.log(uploadPath);
-          console.log(path.join(uploadPath.toString(), filename.filename.toString()));
-          console.log(file)
+//          console.log(path.join(uploadPath.toString(), filename.filename.toString()));
+//          console.log(file)
           // Create a write stream of the new file
           const fstream = fs.createWriteStream(uploadPath);
+
+	  file.on('error', (err) => {
+  		console.error('Error during file streaming:', err);
+		});
           // Pipe it trough
           file.pipe(fstream);
-  
+	console.log("before piping")
+//	await pipeline(file, fstream);
+//	fstream.end()
+	console.log(fstream.writableFinished)
+//	while(!fstream.writableFinished){}
           // On finish of the upload
           fstream.on('close', () => {
               console.log(`Upload of '${filename.filename.toString()}' finished`);
-              transcodeToHLS(uploadPath, outputFilePath, outputDirectory, folderName);
-
-          });
-      });
-      
       const key = `videos/${folderName}/playlist.m3u8`;
       const cdnUrl = `https://chessbulb.s3.us-east-1.amazonaws.com/${key}`;
       res.send({ cdnUrl });
+              transcodeToHLS(uploadPath, outputFilePath, outputDirectory, folderName);
+          });
+	fstream.on('error', (err) => {
+	  console.error('Error during file write:', err);
+	  // Handle the error as needed
+	});
+      });
+      
+
       // await transcodeToHLS(uploadPath, outputFilePath);
           
       //for each file in the output directory, upload it to S3
